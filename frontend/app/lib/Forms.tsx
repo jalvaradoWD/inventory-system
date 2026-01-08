@@ -1,14 +1,17 @@
 "use client";
-
 import {
     ChangeEventHandler,
     FormEvent,
     PropsWithChildren,
     useState,
 } from "react";
-import { AddAuthorsToList } from "../../lib/AddAuthorsToList";
+import { AddAuthorsToList } from "./AddAuthorsToList";
+import { onBookSubmit } from "./Forms.Methods";
 
-export interface IBookFormState {
+export interface IBookForm {
+    _id?: {
+        $oid: string;
+    };
     name: string;
     isbn: string;
     authors: string[];
@@ -16,37 +19,65 @@ export interface IBookFormState {
     read: boolean;
     volume: number;
     edition: number;
+    created_at: { $date: string };
+    updated_at: { $date: string };
 }
 
-export const inputBorderStyles = "border border-gray-500";
+export function InputField(
+    props: PropsWithChildren<
+        {
+            type: "text" | "checkbox" | "number";
+            name: string;
+            onChange: ChangeEventHandler<HTMLInputElement>;
+            min?: number;
+            value?: string | number;
+            className?: string;
+        }
+    >,
+) {
+    const { name, type, onChange, min, value, className } = props;
 
-export default function CreateBook() {
-    const [formState, setFormState] = useState<IBookFormState>({
-        name: "",
-        isbn: "",
-        authors: ["test author"],
-        owned: false,
-        read: false,
-        volume: 0,
-        edition: 0,
-    });
+    const renderOnType = (type: "text" | "checkbox" | "number") => {
+        if (type === "number") {
+            return (
+                <input
+                    type={type}
+                    name={name}
+                    id={name}
+                    onChange={onChange}
+                    min={min}
+                    value={value}
+                />
+            );
+        } else {
+            return (
+                <input
+                    type={type}
+                    name={name}
+                    id={name}
+                    onChange={onChange}
+                    className={className}
+                    value={value}
+                />
+            );
+        }
+    };
 
-    async function onSubmit(e: FormEvent<HTMLFormElement>) {
-        e.preventDefault();
+    return (
+        <section className="block">
+            <label htmlFor={name}>
+                {name.charAt(0).toUpperCase() + name.slice(1).toLowerCase()}:
+            </label>
+            {renderOnType(type)}
+        </section>
+    );
+}
 
-        const dat = new FormData();
-        console.log(dat);
-        const res = await fetch("http://localhost:8000/books", {
-            method: "post",
-            body: JSON.stringify(formState),
-            headers: {
-                "Content-Type": "application/json",
-            },
-        });
-
-        console.log(await res.json());
-        console.log(formState);
-    }
+export function BookForm(
+    props: { formState: IBookForm; title: string; method: "post" | "put" },
+) {
+    const inputBorderStyles = "border border-gray-500";
+    const [formState, setFormState] = useState<IBookForm>(props.formState);
 
     const OnInputFieldChange = (e: FormEvent<HTMLInputElement>) => {
         const a = e.currentTarget;
@@ -62,11 +93,24 @@ export default function CreateBook() {
         }
     };
 
+    const renderDate = (date: string | undefined, labelText: string) => {
+        if (date) {
+            return (
+                <>
+                    <label htmlFor={labelText}>{labelText}</label>
+                    <p id={labelText}>{new Date(date).toString()}</p>
+                </>
+            );
+        }
+
+        return;
+    };
+
     return (
         <>
-            <h1 className="text-3xl">Create Book Page</h1>
+            <h1 className="text-3xl">{props.title}</h1>
 
-            <form onSubmit={onSubmit}>
+            <form onSubmit={(e) => onBookSubmit(e, formState, props.method)}>
                 <InputField
                     type="text"
                     name="name"
@@ -112,7 +156,9 @@ export default function CreateBook() {
                     setFormState={setFormState}
                     onInputFieldChange={OnInputFieldChange}
                     formState={formState}
+                    borderStyles={inputBorderStyles}
                 />
+                {renderDate(formState.created_at?.$date, "Created At")}
                 <input
                     className="block border bg-blue-400 text-white p-2 text-base rounded-lg"
                     type="submit"
@@ -120,52 +166,5 @@ export default function CreateBook() {
                 />
             </form>
         </>
-    );
-}
-
-function InputField(
-    props: PropsWithChildren<
-        {
-            type: "text" | "checkbox" | "number";
-            name: string;
-            onChange: ChangeEventHandler<HTMLInputElement>;
-            min?: number;
-            value?: string | number;
-            className?: string;
-        }
-    >,
-) {
-    const { name, type, onChange, min, value, className } = props;
-
-    const renderOnType = (type: "text" | "checkbox" | "number") => {
-        if (type === "number") {
-            return (
-                <input
-                    type={type}
-                    name={name}
-                    id={name}
-                    onChange={onChange}
-                    min={min}
-                    value={value}
-                />
-            );
-        } else {
-            return (
-                <input
-                    type={type}
-                    name={name}
-                    id={name}
-                    onChange={onChange}
-                    className={className}
-                />
-            );
-        }
-    };
-
-    return (
-        <section className="block">
-            <label htmlFor={name}>{name}:</label>
-            {renderOnType(type)}
-        </section>
     );
 }

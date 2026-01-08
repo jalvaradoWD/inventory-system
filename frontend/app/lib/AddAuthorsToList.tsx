@@ -1,17 +1,19 @@
 "use client";
 import { Dispatch, PropsWithChildren, SetStateAction, useState } from "react";
-import { IBookFormState, inputBorderStyles } from "../book/create/page";
+import { IBookForm } from "./Forms";
 
 export function AddAuthorsToList(
     props: PropsWithChildren<
         {
             authors: string[];
-            setFormState: Dispatch<SetStateAction<IBookFormState>>;
+            setFormState: Dispatch<SetStateAction<IBookForm>>;
             onInputFieldChange: Function;
-            formState: IBookFormState;
+            formState: IBookForm;
+            borderStyles: string;
         }
     >,
 ) {
+    // TODO: There is a bug where you press enter, it deletes the first author.
     const [authorInput, setAuthorInput] = useState<string>("");
 
     return (
@@ -22,7 +24,7 @@ export function AddAuthorsToList(
                     form="authors-form"
                     type="text"
                     name="author"
-                    className={inputBorderStyles}
+                    className={props.borderStyles}
                     onChange={(e) => {
                         e.preventDefault();
                         setAuthorInput(e.target.value);

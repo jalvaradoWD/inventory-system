@@ -1,4 +1,5 @@
 from contextlib import asynccontextmanager
+import datetime
 from fastapi.middleware.cors import CORSMiddleware
 
 from dotenv import dotenv_values
@@ -75,6 +76,19 @@ def create_a_book(book: Book):
 @app.put("/books/{book_id}")
 def update_a_book(book_id: str, updated_book: Book):
     found_book = app.database["books"].find_one({"_id": ObjectId(book_id)})
-    print(found_book)
-    print(book_id)
-    return "Hello world"
+    print(updated_book)
+
+    u_book = app.database["books"].find_one_and_update(
+        {"_id": ObjectId(book_id)},
+        {
+            "$set": {
+                "name": updated_book.name,
+                "isbn": updated_book.isbn,
+                "authors": updated_book.authors,
+                "read": updated_book.read,
+                "owned": updated_book.owned,
+                "updated_at": datetime.datetime.now(datetime.timezone.utc),
+            }
+        },
+    )
+    return json.loads(json_util.dumps(u_book))
