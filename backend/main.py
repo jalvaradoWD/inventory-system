@@ -3,6 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from dotenv import dotenv_values
 from pymongo import MongoClient
+from bson import ObjectId, json_util
+import json
 import pymongo
 
 from classes import Book, MyApp
@@ -44,13 +46,22 @@ def index():
 def get_all_books():
     all_books = (
         app.database["books"]
-        .find({}, projection={"_id": False})
+        .find(
+            {},
+        )
         .sort("created_at", pymongo.DESCENDING)
     )
     with all_books as cursor:
-        return cursor.to_list()
+        books_as_json = json.loads(json_util.dumps(cursor.to_list()))
 
-    return ""
+        return books_as_json
+
+
+@app.get("/books/{book_id}")
+def get_specific_book(book_id: str):
+    found_book = app.database["books"].find_one({"_id": ObjectId(book_id)})
+
+    return json.loads(json_util.dumps(found_book))
 
 
 @app.post("/books")
@@ -59,3 +70,11 @@ def create_a_book(book: Book):
     created_book = app.database["books"].insert_one(book.model_dump())
     print(created_book)
     return f"Book '{book.name}' has been created."
+
+
+@app.put("/books/{book_id}")
+def update_a_book(book_id: str, updated_book: Book):
+    found_book = app.database["books"].find_one({"_id": ObjectId(book_id)})
+    print(found_book)
+    print(book_id)
+    return "Hello world"

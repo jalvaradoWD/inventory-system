@@ -1,5 +1,8 @@
-interface Book {
-  name : string;
+interface IBook {
+  _id: {
+    $oid: string;
+  };
+  name: string;
   isbn: string;
   authors: string[];
   owned: boolean;
@@ -7,30 +10,37 @@ interface Book {
   volume: number;
   edition: number;
 
-  created_at: Date | string;
-  updated_at: Date | string;
+  created_at: {
+    $date: Date;
+  };
+  updated_at: {
+    $date: Date;
+  };
 }
 
 export default async function Home() {
   const data = await fetch("http://localhost:8000/books");
-  const books: Book[] = await data.json();
+  const books: IBook[] = await data.json();
 
   return (
     <>
-      {books.map((item:Book) => {
-        item.created_at = new Date(item.created_at)
-        item.updated_at = new Date(item.updated_at)
-        console.log(typeof item.created_at)
-        return <div className="mt-4 mx-2 p-4 border-4">
-          <h1 className="text-3xl">{item.name}</h1>
-          <ul>
-            {item.authors.map(author=> {
-              return <li>- {author}</li>
-            })}
-          </ul>
-          <p>{item.created_at.toString()}</p>
-          <p>{item.updated_at.toString()}</p>
-          </div>;
+      {books.map((item: IBook) => {
+        item.created_at.$date = new Date(item.created_at.$date);
+        item.updated_at.$date = new Date(item.updated_at.$date);
+        console.log(typeof item.created_at);
+        return (
+          <div className="mt-4 mx-2 p-4 border-4">
+            <h1 className="text-3xl">{item.name}</h1>
+            <h2>{item._id.$oid}</h2>
+            <ul>
+              {item.authors.map((author) => {
+                return <li>- {author}</li>;
+              })}
+            </ul>
+            <p>{item.created_at.$date.toUTCString()}</p>
+            <p>{item.updated_at.$date.toUTCString()}</p>
+          </div>
+        );
       })}
     </>
   );

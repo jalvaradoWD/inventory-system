@@ -1,6 +1,6 @@
 from collections.abc import Coroutine
 from contextlib import AbstractAsyncContextManager
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Annotated, Any, Callable, Mapping, Sequence, Union
 
 from fastapi import APIRouter, FastAPI, Response
@@ -130,8 +130,12 @@ class Book(BaseModel):
     edition: Annotated[Union[int, None], Field(alias="edition", gt=-1)] = None
 
     created_at: Annotated[
-        datetime, Field(default_factory=datetime.now), Field(alias="created_at")
+        datetime,
+        Field(default_factory=lambda x: datetime.now(timezone.utc)),
+        Field(alias="created_at"),
     ]
     updated_at: Annotated[
-        datetime, Field(default_factory=datetime.now), Field(alias="updated_at")
+        datetime,
+        Field(default_factory=lambda x: datetime.now(timezone.utc)),
+        Field(alias="updated_at"),
     ]

@@ -8,7 +8,7 @@ import {
 } from "react";
 import { AddAuthorsToList } from "../../lib/AddAuthorsToList";
 
-export interface IFormState {
+export interface IBookFormState {
     name: string;
     isbn: string;
     authors: string[];
@@ -21,7 +21,7 @@ export interface IFormState {
 export const inputBorderStyles = "border border-gray-500";
 
 export default function CreateBook() {
-    const [formState, setFormState] = useState<IFormState>({
+    const [formState, setFormState] = useState<IBookFormState>({
         name: "",
         isbn: "",
         authors: ["test author"],
