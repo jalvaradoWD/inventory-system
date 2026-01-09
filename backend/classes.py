@@ -126,8 +126,8 @@ class Book(BaseModel):
     authors: Annotated[list[str], Field(alias="authors")]
     owned: Annotated[bool, Field(alias="owned")] = False
     read: Annotated[bool, Field(alias="read")] = False
-    volume: Annotated[Union[int, None], Field(alias="volume", gt=-1)] = None
-    edition: Annotated[Union[int, None], Field(alias="edition", gt=-1)] = None
+    volume: Annotated[Union[int, None], Field(alias="volume", gt=-1)] = 0
+    edition: Annotated[Union[int, None], Field(alias="edition", gt=-1)] = 0
 
     created_at: Annotated[
         datetime,

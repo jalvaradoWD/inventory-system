@@ -32,10 +32,11 @@ export function InputField(
             min?: number;
             value?: string | number;
             className?: string;
+            checked?: boolean;
         }
     >,
 ) {
-    const { name, type, onChange, min, value, className } = props;
+    const { name, type, onChange, min, value, className, checked } = props;
 
     const renderOnType = (type: "text" | "checkbox" | "number") => {
         if (type === "number") {
@@ -45,8 +46,8 @@ export function InputField(
                     name={name}
                     id={name}
                     onChange={onChange}
-                    min={min}
                     value={value}
+                    className={className}
                 />
             );
         } else {
@@ -58,6 +59,7 @@ export function InputField(
                     onChange={onChange}
                     className={className}
                     value={value}
+                    checked={checked}
                 />
             );
         }
@@ -96,10 +98,12 @@ export function BookForm(
     const renderDate = (date: string | undefined, labelText: string) => {
         if (date) {
             return (
-                <>
-                    <label htmlFor={labelText}>{labelText}</label>
+                <section>
+                    <label htmlFor={labelText}>
+                        <strong>{labelText}</strong>
+                    </label>
                     <p id={labelText}>{new Date(date).toString()}</p>
-                </>
+                </section>
             );
         }
 
@@ -109,7 +113,7 @@ export function BookForm(
     return (
         <>
             <h1 className="text-3xl">{props.title}</h1>
-
+            {renderDate(formState.created_at?.$date, "Created At")}
             <form onSubmit={(e) => onBookSubmit(e, formState, props.method)}>
                 <InputField
                     type="text"
@@ -125,16 +129,7 @@ export function BookForm(
                     value={formState.isbn}
                     className={inputBorderStyles}
                 />
-                <InputField
-                    type="checkbox"
-                    name="owned"
-                    onChange={OnInputFieldChange}
-                />
-                <InputField
-                    type="checkbox"
-                    name="read"
-                    onChange={OnInputFieldChange}
-                />
+
                 <InputField
                     type="number"
                     name="volume"
@@ -151,6 +146,7 @@ export function BookForm(
                     className={inputBorderStyles}
                     min={0}
                 />
+
                 <AddAuthorsToList
                     authors={formState.authors}
                     setFormState={setFormState}
@@ -158,7 +154,18 @@ export function BookForm(
                     formState={formState}
                     borderStyles={inputBorderStyles}
                 />
-                {renderDate(formState.created_at?.$date, "Created At")}
+                <InputField
+                    type="checkbox"
+                    name="owned"
+                    onChange={OnInputFieldChange}
+                    checked={formState.owned}
+                />
+                <InputField
+                    type="checkbox"
+                    name="read"
+                    onChange={OnInputFieldChange}
+                    checked={formState.read}
+                />
                 <input
                     className="block border bg-blue-400 text-white p-2 text-base rounded-lg"
                     type="submit"

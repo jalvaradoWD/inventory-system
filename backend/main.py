@@ -61,23 +61,17 @@ def get_all_books():
 @app.get("/books/{book_id}")
 def get_specific_book(book_id: str):
     found_book = app.database["books"].find_one({"_id": ObjectId(book_id)})
-
     return json.loads(json_util.dumps(found_book))
 
 
 @app.post("/books")
 def create_a_book(book: Book):
-    print(book)
     created_book = app.database["books"].insert_one(book.model_dump())
-    print(created_book)
-    return f"Book '{book.name}' has been created."
+    return json.loads(json_util.dumps(created_book))
 
 
 @app.put("/books/{book_id}")
 def update_a_book(book_id: str, updated_book: Book):
-    found_book = app.database["books"].find_one({"_id": ObjectId(book_id)})
-    print(updated_book)
-
     u_book = app.database["books"].find_one_and_update(
         {"_id": ObjectId(book_id)},
         {
@@ -87,8 +81,12 @@ def update_a_book(book_id: str, updated_book: Book):
                 "authors": updated_book.authors,
                 "read": updated_book.read,
                 "owned": updated_book.owned,
+                "edition": updated_book.edition,
+                "volume": updated_book.volume,
                 "updated_at": datetime.datetime.now(datetime.timezone.utc),
             }
         },
+        return_document=True,
     )
+
     return json.loads(json_util.dumps(u_book))
