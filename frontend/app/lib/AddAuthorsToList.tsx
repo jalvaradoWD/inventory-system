@@ -13,8 +13,31 @@ export function AddAuthorsToList(
         }
     >,
 ) {
-    // TODO: There is a bug where you press enter, it deletes the first author.
     const [authorInput, setAuthorInput] = useState<string>("");
+
+    const AddAuthor = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        try {
+            if (e.key === "Enter") {
+                if (authorInput.length > 0) {
+                    props.setFormState({
+                        ...props.formState,
+                        authors: [
+                            ...props.formState.authors,
+                            authorInput,
+                        ],
+                    });
+
+                    setAuthorInput("");
+                } else {
+                    throw new Error("No Input Detected for the author.");
+                }
+            }
+        } catch (error) {
+            if (error instanceof Error) {
+                console.error(error.message);
+            }
+        }
+    };
 
     return (
         <section id="authors-form">
@@ -29,21 +52,7 @@ export function AddAuthorsToList(
                         e.preventDefault();
                         setAuthorInput(e.target.value);
                     }}
-                    onKeyDown={(e) => {
-                        // This is the submission code for just the array of authors.
-                        if (e.key === "Enter") {
-                            // When pressing the enter key, the value of the input tag will be added as an authoer to the author array.
-                            props.setFormState({
-                                ...props.formState,
-                                authors: [
-                                    ...props.formState.authors,
-                                    authorInput,
-                                ],
-                            });
-
-                            setAuthorInput("");
-                        }
-                    }}
+                    onKeyDown={AddAuthor}
                     value={authorInput}
                     minLength={0}
                     required
