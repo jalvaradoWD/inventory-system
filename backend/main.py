@@ -1,7 +1,7 @@
 from contextlib import asynccontextmanager
 import datetime
-from http.cookies import BaseCookie
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi import HTTPException, status
 
 from dotenv import dotenv_values
 from pymongo import MongoClient
@@ -9,7 +9,7 @@ from bson import ObjectId, json_util
 import json
 import pymongo
 
-from classes import Book, MyApp
+from models import Book, MyApp
 
 
 origins = [
@@ -44,7 +44,7 @@ def index():
     return {"message": "Index Route"}
 
 
-@app.get("/books")
+@app.get("/books", status_code=status.HTTP_200_OK)
 def get_all_books():
     all_books = (
         app.database["books"]
@@ -54,18 +54,19 @@ def get_all_books():
         .sort("created_at", pymongo.DESCENDING)
     )
     with all_books as cursor:
-        books_as_json = json.loads(json_util.dumps(cursor.to_list()))
-
+        books_as_json: list[Book] = json.loads(json_util.dumps(cursor.to_list()))
+        print(type(books_as_json[0]))
+        # print(books_as_json[0]["_id"]["$oid"])
         return books_as_json
 
 
-@app.get("/books/{book_id}")
+@app.get("/books/{book_id}", status_code=status.HTTP_200_OK)
 def get_specific_book(book_id: str):
     found_book = app.database["books"].find_one({"_id": ObjectId(book_id)})
     return json.loads(json_util.dumps(found_book))
 
 
-@app.post("/books")
+@app.post("/books", status_code=status.HTTP_201_CREATED)
 def create_a_book(book: Book):
     created_book = app.database["books"].insert_one(book.model_dump())
     response = {"message": "", "document": {}}
@@ -75,7 +76,7 @@ def create_a_book(book: Book):
     return json.loads(json_util.dumps(response))
 
 
-@app.put("/books/{book_id}")
+@app.put("/books/{book_id}", status_code=status.HTTP_200_OK)
 def update_a_book(book_id: str, updated_book: Book):
     u_book = app.database["books"].find_one_and_update(
         {"_id": ObjectId(book_id)},

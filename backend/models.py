@@ -3,6 +3,7 @@ from contextlib import AbstractAsyncContextManager
 from datetime import datetime, timezone
 from typing import Annotated, Any, Callable, Mapping, Sequence, Union
 
+from bson import ObjectId
 from fastapi import APIRouter, FastAPI, Response
 from fastapi.applications import AppType
 from fastapi.background import P
