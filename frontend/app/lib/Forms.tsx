@@ -7,6 +7,7 @@ import {
 } from "react";
 import { AddAuthorsToList } from "./AddAuthorsToList";
 import { onBookSubmit } from "./Forms.Methods";
+import Link from "next/link";
 
 export interface IBookForm {
     _id?: {
@@ -115,6 +116,7 @@ export function BookForm(
             <h1 className="text-3xl">{props.title}</h1>
             {renderDate(formState.created_at?.$date, "Created At")}
             <form onSubmit={(e) => onBookSubmit(e, formState, props.method)}>
+                <h2 className="text-4xl">{formState.name}</h2>
                 <InputField
                     type="text"
                     name="name"
@@ -166,6 +168,12 @@ export function BookForm(
                     onChange={OnInputFieldChange}
                     checked={formState.read}
                 />
+                <Link
+                    className="block border bg-red-400 text-white p-2 text-base rounded-lg w-fit"
+                    href="/books"
+                >
+                    Cancel
+                </Link>
                 <input
                     className="block border bg-blue-400 text-white p-2 text-base rounded-lg"
                     type="submit"
