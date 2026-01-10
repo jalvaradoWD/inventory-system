@@ -1,5 +1,6 @@
 from contextlib import asynccontextmanager
 import datetime
+from http.cookies import BaseCookie
 from fastapi.middleware.cors import CORSMiddleware
 
 from dotenv import dotenv_values
@@ -67,7 +68,11 @@ def get_specific_book(book_id: str):
 @app.post("/books")
 def create_a_book(book: Book):
     created_book = app.database["books"].insert_one(book.model_dump())
-    return json.loads(json_util.dumps(created_book))
+    response = {"message": "", "document": {}}
+    response_obj = {"_id": None, **book.model_dump()}
+    response_obj["_id"] = created_book.inserted_id
+    response["document"] = response_obj
+    return json.loads(json_util.dumps(response))
 
 
 @app.put("/books/{book_id}")
@@ -90,3 +95,15 @@ def update_a_book(book_id: str, updated_book: Book):
     )
 
     return json.loads(json_util.dumps(u_book))
+
+
+@app.delete("/books/{book_id}")
+def delete_a_book(book_id: str):
+    d_book = app.database["books"].find_one_and_delete({"_id": ObjectId(book_id)})
+    print(d_book)
+    if d_book is None:
+        return {"message": "There is no book found to delete."}
+    return {
+        "message": f"Book {d_book["name"]}, deleted!",
+        "document": json.loads(json_util.dumps(d_book)),
+    }
