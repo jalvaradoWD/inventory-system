@@ -39,13 +39,13 @@ app.add_middleware(
 )
 
 
-@app.get("/")
-def index():
-    return {"message": "Index Route"}
-
-
 @app.get("/books", status_code=status.HTTP_200_OK)
 def get_all_books():
+    """
+    Makes a database request to get all books from the "books" collection from the {config["DB_NAME"]} database.
+
+    """
+
     all_books = (
         app.database["books"]
         .find(
@@ -53,6 +53,7 @@ def get_all_books():
         )
         .sort("created_at", pymongo.DESCENDING)
     )
+
     with all_books as cursor:
         books_as_json: list[Book] = json.loads(json_util.dumps(cursor.to_list()))
         print(type(books_as_json[0]))
@@ -62,22 +63,46 @@ def get_all_books():
 
 @app.get("/books/{book_id}", status_code=status.HTTP_200_OK)
 def get_specific_book(book_id: str):
+    """
+    Makes a databae request to get information of a spedific book from the `books` collection using the parameter `book_id`.
+
+    :param book_id: The string format of an ObjectID to a specific document within the `books` collection
+    :type book_id: str
+    """
     found_book = app.database["books"].find_one({"_id": ObjectId(book_id)})
     return json.loads(json_util.dumps(found_book))
 
 
 @app.post("/books", status_code=status.HTTP_201_CREATED)
 def create_a_book(book: Book):
+    """
+    Creates a `Book` document based on a model.
+
+    :param book: Uses a `Book` instance from the `models.py` file as the model for how this data is structured and validated.
+    :type book: `Book`
+    """
+
     created_book = app.database["books"].insert_one(book.model_dump())
+
     response = {"message": "", "document": {}}
     response_obj = {"_id": None, **book.model_dump()}
     response_obj["_id"] = created_book.inserted_id
     response["document"] = response_obj
+
     return json.loads(json_util.dumps(response))
 
 
 @app.put("/books/{book_id}", status_code=status.HTTP_200_OK)
 def update_a_book(book_id: str, updated_book: Book):
+    """
+    Updates a `Book` document based on the `book_id` param, and changes the contents by the `update_book` param.
+
+    :param book_id: The `ObjectId` to the document that will be updated.
+    :type book_id: str
+    :param updated_book: The contents of the new information that will be update to the found book.
+    :type updated_book: Book
+    """
+
     u_book = app.database["books"].find_one_and_update(
         {"_id": ObjectId(book_id)},
         {
@@ -100,8 +125,15 @@ def update_a_book(book_id: str, updated_book: Book):
 
 @app.delete("/books/{book_id}")
 def delete_a_book(book_id: str):
+    """
+    Finds a `Book` by `ObjectId` and deletes the document on the spot.
+
+    :param book_id: The `ObjectId` to the document that will be deleted.
+    :type book_id: str
+    """
+
     d_book = app.database["books"].find_one_and_delete({"_id": ObjectId(book_id)})
-    print(d_book)
+
     if d_book is None:
         return {"message": "There is no book found to delete."}
     return {

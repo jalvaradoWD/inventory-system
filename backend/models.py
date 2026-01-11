@@ -20,6 +20,10 @@ from starlette.routing import BaseRoute
 
 
 class MyApp(FastAPI):
+    """
+    I've created this custom class to enable some intellisense functionality whenever I need to create a FastAPI instance.
+    """
+
     mongo_client: MongoClient
     database: database.Database
 
@@ -120,6 +124,10 @@ class MyApp(FastAPI):
 
 
 class Book(BaseModel):
+    """
+    This is the base model for the `Book` model.
+    """
+
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     name: Annotated[str, Field(alias="name", min_length=2)]
