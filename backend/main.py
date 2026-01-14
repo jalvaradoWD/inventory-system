@@ -1,16 +1,15 @@
-from contextlib import asynccontextmanager
 import datetime
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi import HTTPException, status
-
-from dotenv import dotenv_values
-from pymongo import MongoClient
-from bson import ObjectId, json_util
 import json
+from contextlib import asynccontextmanager
+
 import pymongo
+from bson import ObjectId, json_util
+from dotenv import dotenv_values
+from fastapi import HTTPException, status
+from fastapi.middleware.cors import CORSMiddleware
+from pymongo import MongoClient
 
-from models import Book, MyApp
-
+from models import APIReponse, Book, MyApp
 
 origins = [
     "http://localhost:3000",
@@ -56,9 +55,8 @@ def get_all_books():
 
     with all_books as cursor:
         books_as_json: list[Book] = json.loads(json_util.dumps(cursor.to_list()))
-        print(type(books_as_json[0]))
-        # print(books_as_json[0]["_id"]["$oid"])
-        return books_as_json
+
+        return APIReponse(200, books_as_json, "Getting all Textbooks")
 
 
 @app.get("/books/{book_id}", status_code=status.HTTP_200_OK)
@@ -70,7 +68,8 @@ def get_specific_book(book_id: str):
     :type book_id: str
     """
     found_book = app.database["books"].find_one({"_id": ObjectId(book_id)})
-    return json.loads(json_util.dumps(found_book))
+    converted_json = json.loads(json_util.dumps(found_book))
+    return APIReponse(200, converted_json, "Getting specific book info.")
 
 
 @app.post("/books", status_code=status.HTTP_201_CREATED)
@@ -81,15 +80,15 @@ def create_a_book(book: Book):
     :param book: Uses a `Book` instance from the `models.py` file as the model for how this data is structured and validated.
     :type book: `Book`
     """
+    print(book)
 
     created_book = app.database["books"].insert_one(book.model_dump())
 
-    response = {"message": "", "document": {}}
-    response_obj = {"_id": None, **book.model_dump()}
-    response_obj["_id"] = created_book.inserted_id
-    response["document"] = response_obj
-
-    return json.loads(json_util.dumps(response))
+    return APIReponse(
+        201,
+        str(created_book.inserted_id),
+        f"Created book with ID of: {str(created_book.inserted_id)}",
+    )
 
 
 @app.put("/books/{book_id}", status_code=status.HTTP_200_OK)
@@ -120,7 +119,9 @@ def update_a_book(book_id: str, updated_book: Book):
         return_document=True,
     )
 
-    return json.loads(json_util.dumps(u_book))
+    converted_json = json.loads(json_util.dumps(u_book))
+
+    return APIReponse(200, converted_json, f"Book updated")
 
 
 @app.delete("/books/{book_id}")
@@ -135,8 +136,12 @@ def delete_a_book(book_id: str):
     d_book = app.database["books"].find_one_and_delete({"_id": ObjectId(book_id)})
 
     if d_book is None:
-        return {"message": "There is no book found to delete."}
-    return {
-        "message": f"Book {d_book["name"]}, deleted!",
-        "document": json.loads(json_util.dumps(d_book)),
-    }
+        res_status_code = 404
+        raise HTTPException(
+            status_code=res_status_code,
+            detail=APIReponse(
+                res_status_code, message="There is no book found to delete", body=d_book
+            ),
+        )
+    converted_json = json.loads(json_util.dumps(d_book))
+    return APIReponse(200, converted_json, "Deleted Book")

@@ -46,24 +46,3 @@ class HTTP_API_Response:
         self.status_code = status_code
         self.body = body
         self.message = message
-
-
-response_body = {
-    "name": "A Name",
-    "isbn": "1010101001010101010010101001010",
-    "authors": ["Someone", "1"],
-    "owned": True,
-    "read": False,
-    "volume": 0,
-    "edition": 1,
-}
-
-new_response_body = HTTP_API_Response_Body(**response_body)
-
-print(new_response_body.__dict__.keys())
-print(new_response_body._id)
-
-
-# test = HTTP_API_Response(
-#     200,
-# )

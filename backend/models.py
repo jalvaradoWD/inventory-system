@@ -3,7 +3,6 @@ from contextlib import AbstractAsyncContextManager
 from datetime import datetime, timezone
 from typing import Annotated, Any, Callable, Mapping, Sequence, Union
 
-from bson import ObjectId
 from fastapi import APIRouter, FastAPI, Response
 from fastapi.applications import AppType
 from fastapi.background import P
@@ -148,3 +147,17 @@ class Book(BaseModel):
         Field(default_factory=lambda x: datetime.now(timezone.utc)),
         Field(alias="updated_at"),
     ]
+
+
+class APIReponse:
+    status_code: int
+    body: dict | str | int | bool | list
+    message: str
+    """
+    The structure of each response for any API request.
+    """
+
+    def __init__(self, status_code: int, body, message: str) -> None:
+        self.status_code = status_code
+        self.message = message
+        self.body = body
