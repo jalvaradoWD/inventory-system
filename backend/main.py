@@ -39,7 +39,7 @@ app.add_middleware(
 
 
 @app.get("/books", status_code=status.HTTP_200_OK)
-def get_all_books():
+def get_all_books(limit: int = 5, page: int = 0):
     """
     Makes a database request to get all books from the "books" collection from the {config["DB_NAME"]} database.
 
@@ -51,12 +51,22 @@ def get_all_books():
             {},
         )
         .sort("created_at", pymongo.DESCENDING)
+        .limit(limit)
+        .skip(limit * (page - 1))
     )
+
+    total_amount = app.database["books"].count_documents({})
 
     with all_books as cursor:
         books_as_json: list[Book] = json.loads(json_util.dumps(cursor.to_list()))
 
-        return APIReponse(200, books_as_json, "Getting all Textbooks")
+        print(limit, page)
+
+        return APIReponse(
+            200,
+            {"books": books_as_json, "total": total_amount},
+            "Getting all Textbooks",
+        )
 
 
 @app.get("/books/{book_id}", status_code=status.HTTP_200_OK)

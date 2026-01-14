@@ -14,6 +14,7 @@ export function AddAuthorsToList(
     >,
 ) {
     const [authorInput, setAuthorInput] = useState<string>("");
+    let name = "author";
 
     const AddAuthor = (e: React.KeyboardEvent<HTMLInputElement>) => {
         try {
@@ -42,12 +43,11 @@ export function AddAuthorsToList(
     return (
         <section id="authors-form">
             <div className="block">
-                <label htmlFor="author">Author:</label>
                 <input
                     form="authors-form"
                     type="text"
                     name="author"
-                    className={props.borderStyles}
+                    className="input"
                     onChange={(e) => {
                         e.preventDefault();
                         setAuthorInput(e.target.value);
@@ -56,13 +56,15 @@ export function AddAuthorsToList(
                     value={authorInput}
                     minLength={0}
                     required
+                    placeholder={name.charAt(0).toUpperCase() +
+                        name.slice(1).toLowerCase()}
                 />
             </div>
             <h2 className="underline">Current Authors:</h2>
-            <ul className="list-disc">
+            <ul className="list bg-base-100 rounded-box shadow-md">
                 {props.formState.authors.map((author, i) => {
                     return (
-                        <li key={`${i}-${author}`}>
+                        <li key={`${i}-${author}`} className="list-row">
                             {author}
                             <button
                                 onClick={(e) => {
@@ -76,20 +78,14 @@ export function AddAuthorsToList(
                                         1,
                                     );
 
-                                    console.log(
-                                        "Button Clicked",
-                                        author,
-                                        authorsArray.indexOf(author),
-                                    );
-
                                     props.setFormState({
                                         ...props.formState,
                                         authors: [...props.formState.authors],
                                     });
                                 }}
-                                className="bg-red-600 text-white rounded-3xl p-1 text-sm hover:cursor-pointer"
+                                className="btn btn-error size-fit"
                             >
-                                X
+                                Delete
                             </button>
                         </li>
                     );

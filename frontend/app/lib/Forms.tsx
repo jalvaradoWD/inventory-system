@@ -49,8 +49,29 @@ export function InputField(
                     id={name}
                     onChange={onChange}
                     value={value}
-                    className={className}
+                    className="input"
+                    min={0}
+                    placeholder={name}
                 />
+            );
+        } else if (type === "checkbox") {
+            return (
+                <>
+                    <label htmlFor={name} className="label">
+                        <input
+                            type="checkbox"
+                            className="checkbox"
+                            id={name}
+                            name={name}
+                            onChange={onChange}
+                            value={value}
+                            checked={checked}
+                            placeholder={name.charAt(0).toUpperCase() +
+                                name.slice(1).toLowerCase()}
+                        />
+                        {name}
+                    </label>
+                </>
             );
         } else {
             return (
@@ -59,9 +80,11 @@ export function InputField(
                     name={name}
                     id={name}
                     onChange={onChange}
-                    className={className}
+                    className="input"
                     value={value}
                     checked={checked}
+                    placeholder={name.charAt(0).toUpperCase() +
+                        name.slice(1).toLowerCase()}
                 />
             );
         }
@@ -69,9 +92,6 @@ export function InputField(
 
     return (
         <section className="block">
-            <label htmlFor={name}>
-                {name.charAt(0).toUpperCase() + name.slice(1).toLowerCase()}:
-            </label>
             {renderOnType(type)}
         </section>
     );

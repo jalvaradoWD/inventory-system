@@ -151,7 +151,7 @@ class Book(BaseModel):
 
 class APIReponse:
     status_code: int
-    body: dict | str | int | bool | list
+    body: Any
     message: str
     """
     The structure of each response for any API request.

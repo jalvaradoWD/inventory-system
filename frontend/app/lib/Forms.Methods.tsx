@@ -84,12 +84,11 @@ export const deleteBook = async (
     booksState: any,
     useBooksState: any,
 ) => {
-    console.warn("You've clicked me!");
     await fetch(`${baseUrl}/books/${item._id.$oid}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
     });
     useBooksState(
-        booksState.filter((book: any) => book._id.$oid !== item._id.$oid),
+        booksState.filter((book: IBook) => book._id.$oid !== item._id.$oid),
     );
 };
