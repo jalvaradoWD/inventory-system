@@ -1,4 +1,4 @@
-import { BookForm, IBookForm } from "@/app/lib/Forms";
+import { BookForm } from "@/app/lib/Forms";
 import { IAPIResponse, IBook } from "@/app/lib/types";
 import { baseUrl } from "@/app/lib/vars";
 
