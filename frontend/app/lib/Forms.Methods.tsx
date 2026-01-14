@@ -1,29 +1,13 @@
-import { FormEvent } from "react";
-import { baseUrl } from "./vars";
-import { IBookForm } from "./Forms";
 import { redirect } from "next/navigation";
+import { FormEvent } from "react";
+import { IAPIResponse, IBook, IErrorResponse } from "./types";
+import { baseUrl } from "./vars";
 
-interface IResponseError {
-    detail: Detail[];
-}
-
-interface Detail {
-    type: string;
-    loc: string[];
-    msg: string;
-    input: null | string;
-    ctx?: Ctx;
-}
-
-interface Ctx {
-    min_length: number;
-}
-
-class ResponseError extends Error {
-    responseMessage: IResponseError;
+class APIResponseError extends Error {
+    responseMessage: IAPIResponse<IErrorResponse>;
 
     constructor(
-        responseMessage: IResponseError,
+        responseMessage: IAPIResponse<IErrorResponse>,
     ) {
         super();
         this.responseMessage = responseMessage;
@@ -32,7 +16,7 @@ class ResponseError extends Error {
 
 export async function onBookSubmit(
     e: FormEvent<HTMLFormElement>,
-    formState: IBookForm,
+    formState: IBook,
     method: "post" | "put",
 ) {
     e.preventDefault();
@@ -82,10 +66,11 @@ export async function onBookSubmit(
 
         if (res.status === 422) {
             ifError = false;
-            throw new ResponseError(await res.json());
+            let res_json: IAPIResponse<IErrorResponse> = await res.json();
+            throw new APIResponseError(res_json);
         }
     } catch (e) {
-        if (e instanceof ResponseError) {
+        if (e instanceof APIResponseError) {
             console.error("This is a response error", e.responseMessage);
         }
     }

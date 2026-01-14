@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import {
     ChangeEventHandler,
     FormEvent,
@@ -7,7 +8,7 @@ import {
 } from "react";
 import { AddAuthorsToList } from "./AddAuthorsToList";
 import { onBookSubmit } from "./Forms.Methods";
-import Link from "next/link";
+import { IBook } from "./types";
 
 export interface IBookForm {
     _id?: {
@@ -77,10 +78,10 @@ export function InputField(
 }
 
 export function BookForm(
-    props: { formState: IBookForm; title: string; method: "post" | "put" },
+    props: { formState: IBook; title: string; method: "post" | "put" },
 ) {
     const inputBorderStyles = "border border-gray-500";
-    const [formState, setFormState] = useState<IBookForm>(props.formState);
+    const [formState, setFormState] = useState<IBook>(props.formState);
 
     const OnInputFieldChange = (e: FormEvent<HTMLInputElement>) => {
         const a = e.currentTarget;
@@ -114,7 +115,7 @@ export function BookForm(
     return (
         <>
             <h1 className="text-3xl">{props.title}</h1>
-            {renderDate(formState.created_at?.$date, "Created At")}
+            {renderDate(formState.created_at?.$date.toString(), "Created At")}
             <form onSubmit={(e) => onBookSubmit(e, formState, props.method)}>
                 <h2 className="text-4xl">{formState.name}</h2>
                 <InputField

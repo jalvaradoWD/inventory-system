@@ -1,38 +1,17 @@
 "use client";
 import Link from "next/link";
-import { baseUrl } from "../lib/vars";
 import { useEffect, useState } from "react";
 import { deleteBook } from "../lib/Forms.Methods";
-
-export interface IBook {
-  _id: {
-    $oid: string;
-  };
-  name: string;
-  isbn: string;
-  authors: string[];
-  owned: boolean;
-  read: boolean;
-  volume: number;
-  edition: number;
-
-  created_at: {
-    $date: Date;
-  };
-  updated_at: {
-    $date: Date;
-  };
-}
+import { IAPIResponse, IBook } from "../lib/types";
+import { baseUrl } from "../lib/vars";
 
 export default function Home() {
-  // const data = await fetch(`${baseUrl}/books`);
-  // const books: IBook[] = await data.json();
   const [booksState, useBooksState] = useState<IBook[]>([]);
 
   const fetchData = async () => {
     const data = await fetch(`${baseUrl}/books`);
-    const books: IBook[] = await data.json();
-    useBooksState(books);
+    const response: IAPIResponse<IBook[]> = await data.json();
+    useBooksState(response.body);
   };
 
   useEffect(() => {

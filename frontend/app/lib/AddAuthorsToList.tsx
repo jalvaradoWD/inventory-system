@@ -1,14 +1,14 @@
 "use client";
 import { Dispatch, PropsWithChildren, SetStateAction, useState } from "react";
-import { IBookForm } from "./Forms";
+import { IBook } from "./types";
 
 export function AddAuthorsToList(
     props: PropsWithChildren<
         {
             authors: string[];
-            setFormState: Dispatch<SetStateAction<IBookForm>>;
+            setFormState: Dispatch<SetStateAction<IBook>>;
             onInputFieldChange: Function;
-            formState: IBookForm;
+            formState: IBook;
             borderStyles: string;
         }
     >,

@@ -1,16 +1,20 @@
 import { BookForm, IBookForm } from "@/app/lib/Forms";
+import { IAPIResponse, IBook } from "@/app/lib/types";
 import { baseUrl } from "@/app/lib/vars";
 
 export default async function Page(props: PageProps<"/books/update/[id]">) {
     const { id: book_id } = await props.params;
-    const book_data: IBookForm =
+    const response: IAPIResponse<IBook> =
         await (await fetch(`${baseUrl}/books/${book_id}`))
             .json();
 
-    console.log(book_data);
     return (
         <>
-            <BookForm formState={book_data} title="Update Book" method="put" />
+            <BookForm
+                formState={response.body}
+                title="Update Book"
+                method="put"
+            />
         </>
     );
 }
