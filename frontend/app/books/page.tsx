@@ -105,7 +105,6 @@ export default function Home() {
         >
           {properties.map((item, i) => {
             const itemName: string = Object.keys(item)[0];
-            const itemValue: boolean = item[itemName];
 
             return (
               <li key={`property-${item}-${i}`} className="flex-row">
@@ -161,21 +160,39 @@ export default function Home() {
         </thead>
         <tbody>
           {bookState ? (
-            bookState.map((item: IBook) => {
+            bookState.map((book: IBook) => {
               return (
-                <tr key={item._id.$oid}>
-                  <td>{item.name}</td>
-                  <td>{item.isbn}</td>
-                  <td>{new Date(item.created_at.$date).toString()}</td>
+                <tr key={book._id.$oid}>
+                  {properties
+                    .filter((property) => {
+                      let itemName = Object.keys(property)[0];
+                      if (property[itemName]) {
+                        return true;
+                      } else {
+                        return false;
+                      }
+                    })
+                    .map((property) => {
+                      const itemName = Object.keys(property)[0];
+
+                      const formattedBook = new Book().convertIBook(book);
+
+                      return (
+                        <td key={`property-${itemName}-view`}>
+                          {formattedBook[itemName]}
+                        </td>
+                      );
+                    })}
+
                   <td>
                     <Link
-                      href={`/books/update/${item._id.$oid}`}
+                      href={`/books/update/${book._id.$oid}`}
                       className="btn btn-primary size-fit w-full"
                     >
                       Update
                     </Link>
                     <button
-                      onClick={() => deleteBook(item, bookState, setBooksState)}
+                      onClick={() => deleteBook(book, bookState, setBooksState)}
                       className="btn btn-error text-white size-fit w-full"
                     >
                       Delete
