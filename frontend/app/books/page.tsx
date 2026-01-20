@@ -1,7 +1,6 @@
 "use client";
 import Link from "next/link";
 import {
-  ChangeEvent,
   Dispatch,
   FormEvent,
   SetStateAction,
@@ -9,18 +8,33 @@ import {
   useState,
 } from "react";
 import { deleteBook } from "../lib/Forms.Methods";
-import { IAPIResponse, IBook } from "../lib/types";
+import { Book, IAPIResponse, IBook } from "../lib/types";
 
 const limitNumbers = [10, 25, 50, 100];
 
 let maxPages = (total: number, limit: number) => Math.floor(total / limit);
 
-export default function Home(props: PageProps<"/books">) {
+export default function Home() {
+  let defaultProperties: { [name: string]: boolean }[] = [
+    { _id: false },
+    { name: true },
+    { isbn: true },
+    { authors: false },
+    { owned: false },
+    { read: false },
+    { volume: false },
+    { edition: false },
+    { created_at: true },
+    { updated_at: false },
+  ];
+
   const [bookState, setBooksState] = useState<IBook[]>([]);
-  const [limit, setLimit] = useState(1);
+  const [limit, setLimit] = useState(limitNumbers[0]);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
-  const [maxPage, setMaxPage] = useState(maxPages(page, limit));
+  const [properties, setProperties] = useState<{ [name: string]: boolean }[]>([
+    ...defaultProperties,
+  ]);
 
   const fetchData = async () => {
     const limitQuery = limit >= 1 ? `limit=${limit}` : "";
@@ -37,10 +51,10 @@ export default function Home(props: PageProps<"/books">) {
 
   useEffect(() => {
     fetchData();
-  }, [limit, page]);
+  }, [limit, page, properties]);
 
-  const numberChange = async (
-    e: FormEvent<HTMLInputElement>,
+  const limitNumberChange = async (
+    e: FormEvent<HTMLInputElement | HTMLSelectElement>,
     setFunction: Dispatch<SetStateAction<number>>,
   ) => {
     e.preventDefault();
@@ -57,37 +71,91 @@ export default function Home(props: PageProps<"/books">) {
       />
       <section>
         <label htmlFor="">Limit</label>
-        <input
-          type="number"
-          name="limit"
-          onChange={(e) => {
-            numberChange(e, setLimit);
-
+        <select
+          name=""
+          id=""
+          className="select"
+          onChange={(e: FormEvent<HTMLSelectElement>) => {
+            limitNumberChange(e, setLimit);
             if (page > maxPages(total, limit)) {
               setPage(maxPages(total, limit) + 1);
             }
           }}
-          value={limit}
-          min={1}
-        />
+        >
+          <option disabled={true} value="">
+            Pick a Limit
+          </option>
+
+          {limitNumbers.map((item) => {
+            return (
+              <option key={`limit-${item}`} value={item}>
+                {item}
+              </option>
+            );
+          })}
+        </select>
       </section>
-      <section>
-        <label htmlFor="">Page</label>
-        <input
-          type="number"
-          name="page"
-          onChange={(e) => numberChange(e, setPage)}
-          value={page}
-          min={1}
-          max={maxPages(total, limit) + 1}
-        />
-      </section>
+      <div className="dropdown dropdown-right">
+        <div tabIndex={0} role="button" className="btn btn-ghost rounded-field">
+          Properties
+        </div>
+        <ul
+          tabIndex={-1}
+          className="menu dropdown-content bg-base-200 rounded-box z-1 mt-4 w-52 p-2 shadow-sm"
+        >
+          {properties.map((item, i) => {
+            const itemName: string = Object.keys(item)[0];
+            const itemValue: boolean = item[itemName];
+
+            return (
+              <li key={`property-${item}-${i}`} className="flex-row">
+                <label
+                  htmlFor={`${itemName}-checkbox`}
+                  className="text-left mr-auto"
+                >
+                  {itemName}
+                </label>
+                <input
+                  id={`${itemName}-checkbox`}
+                  type="checkbox"
+                  className="checkbox"
+                  checked={
+                    properties.filter(
+                      (property) => Object.keys(property)[0] === itemName,
+                    )[0][itemName]
+                  }
+                  onChange={(e: FormEvent<HTMLInputElement>) => {
+                    e.preventDefault();
+                    const currentValue = Boolean(e.currentTarget.checked);
+
+                    setProperties([
+                      ...properties.map((property) => {
+                        if (Object.keys(property)[0] === itemName) {
+                          return { [itemName]: currentValue };
+                        }
+
+                        return property;
+                      }),
+                    ]);
+                  }}
+                />
+              </li>
+            );
+          })}
+        </ul>
+      </div>
       <table className="table">
         <thead>
           <tr>
-            <th>Name</th>
-            <th>Isbn</th>
-            <th>Created At</th>
+            {properties
+              .filter((item) => {
+                return item[Object.keys(item)[0]];
+              })
+              .map((item, i) => {
+                return (
+                  <th key={`property-${item}-${i}`}>{Object.keys(item)[0]}</th>
+                );
+              })}
             <th>Options</th>
           </tr>
         </thead>
