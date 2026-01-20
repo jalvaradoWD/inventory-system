@@ -10,16 +10,17 @@ import {
 } from "react";
 import { deleteBook } from "../lib/Forms.Methods";
 import { IAPIResponse, IBook } from "../lib/types";
-import { baseUrl } from "../lib/vars";
-import { useParams, useRouter } from "next/navigation";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const limitNumbers = [10, 25, 50, 100];
+
+let maxPages = (total: number, limit: number) => Math.floor(total / limit);
 
 export default function Home(props: PageProps<"/books">) {
   const [bookState, setBooksState] = useState<IBook[]>([]);
   const [limit, setLimit] = useState(1);
   const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [maxPage, setMaxPage] = useState(maxPages(page, limit));
 
   const fetchData = async () => {
     const limitQuery = limit >= 1 ? `limit=${limit}` : "";
@@ -31,7 +32,7 @@ export default function Home(props: PageProps<"/books">) {
       await res.json();
 
     setBooksState(data.body.books);
-    return data;
+    setTotal(data.body.total);
   };
 
   useEffect(() => {
@@ -49,14 +50,25 @@ export default function Home(props: PageProps<"/books">) {
   return (
     <>
       <h1 className="text-4xl">Books Home Page</h1>
-
+      <Paginiation
+        pages={maxPages(total, limit)}
+        currentPage={page}
+        setPage={setPage}
+      />
       <section>
         <label htmlFor="">Limit</label>
         <input
           type="number"
           name="limit"
-          onChange={(e) => numberChange(e, setLimit)}
+          onChange={(e) => {
+            numberChange(e, setLimit);
+
+            if (page > maxPages(total, limit)) {
+              setPage(maxPages(total, limit) + 1);
+            }
+          }}
           value={limit}
+          min={1}
         />
       </section>
       <section>
@@ -66,6 +78,8 @@ export default function Home(props: PageProps<"/books">) {
           name="page"
           onChange={(e) => numberChange(e, setPage)}
           value={page}
+          min={1}
+          max={maxPages(total, limit) + 1}
         />
       </section>
       <table className="table">
@@ -107,6 +121,43 @@ export default function Home(props: PageProps<"/books">) {
           )}
         </tbody>
       </table>
+      <Paginiation
+        pages={maxPages(total, limit)}
+        currentPage={page}
+        setPage={setPage}
+      />
     </>
+  );
+}
+
+function Paginiation(props: {
+  pages: number;
+  currentPage: number;
+  setPage: Dispatch<SetStateAction<number>>;
+}) {
+  const { pages, currentPage } = props;
+  const buttons = [];
+
+  for (let i = 0; i < pages + 1; i++) {
+    let formattedNumber = i + 1;
+    buttons.push(formattedNumber);
+  }
+
+  return (
+    <section className="join">
+      {buttons.map((item) => (
+        <button
+          className={`join-item btn${item === currentPage ? " btn-active" : ""}`}
+          key={item}
+          onClick={(e) => {
+            e.preventDefault();
+            props.setPage(Number(e.currentTarget.value));
+          }}
+          value={item}
+        >
+          {item}
+        </button>
+      ))}
+    </section>
   );
 }
