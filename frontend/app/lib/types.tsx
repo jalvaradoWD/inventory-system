@@ -1,3 +1,5 @@
+export type IBookProperties = { [name: string]: boolean }[];
+
 export interface IBook {
   _id: {
     $oid: string;
