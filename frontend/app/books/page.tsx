@@ -35,12 +35,14 @@ export default function Home() {
   const [properties, setProperties] = useState<{ [name: string]: boolean }[]>([
     ...defaultProperties,
   ]);
+  const [searchTerm, setSearchTerm] = useState<string>("");
 
   const fetchData = async () => {
     const limitQuery = limit >= 1 ? `limit=${limit}` : "";
     const pageQuery = page >= 1 ? `page=${page}` : "";
+    const searchQuery = searchTerm.length >= 1 ? `search=${searchTerm}` : "";
     const res = await fetch(
-      `http://localhost:8000/books/?${limitQuery}&${pageQuery}`,
+      `http://localhost:8000/books/?${limitQuery}&${pageQuery}&${searchQuery}`,
     );
     const data: IAPIResponse<{ books: IBook[]; total: number }> =
       await res.json();
@@ -51,7 +53,7 @@ export default function Home() {
 
   useEffect(() => {
     fetchData();
-  }, [limit, page, properties]);
+  }, [limit, page, properties, searchTerm]);
 
   const limitNumberChange = async (
     e: FormEvent<HTMLInputElement | HTMLSelectElement>,
@@ -62,8 +64,41 @@ export default function Home() {
   };
 
   return (
-    <>
+    <section className="flex-col">
       <h1 className="text-4xl">Books Home Page</h1>
+      <label className="input">
+        <svg
+          className="h-[1em] opacity-50"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+        >
+          <g
+            strokeLinejoin="round"
+            strokeLinecap="round"
+            strokeWidth="2.5"
+            fill="none"
+            stroke="currentColor"
+          >
+            <circle cx="11" cy="11" r="8"></circle>
+            <path d="m21 21-4.3-4.3"></path>
+          </g>
+        </svg>
+        <input
+          type="search"
+          required
+          placeholder="Search"
+          onChange={(e: FormEvent<HTMLInputElement>) => {
+            e.preventDefault();
+            const currVal: string = e.currentTarget.value;
+            setSearchTerm(currVal);
+          }}
+          value={searchTerm}
+          onSubmit={(e) => {
+            e.preventDefault();
+            console.log("Something");
+          }}
+        />
+      </label>
       <Paginiation
         pages={maxPages(total, limit)}
         currentPage={page}
@@ -211,7 +246,7 @@ export default function Home() {
         currentPage={page}
         setPage={setPage}
       />
-    </>
+    </section>
   );
 }
 
@@ -229,7 +264,7 @@ function Paginiation(props: {
   }
 
   return (
-    <section className="join">
+    <section className="join block">
       {buttons.map((item) => (
         <button
           className={`join-item btn${item === currentPage ? " btn-active" : ""}`}

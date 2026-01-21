@@ -39,18 +39,15 @@ app.add_middleware(
 
 
 @app.get("/books", status_code=status.HTTP_200_OK)
-def get_all_books(limit: int = 5, page: int = 1):
+def get_all_books(limit: int = 5, page: int = 1, search: str = ""):
     """
     Makes a database request to get all books from the "books" collection from the {config["DB_NAME"]} database.
 
     """
 
-    print(limit, page)
     all_books = (
         app.database["books"]
-        .find(
-            {},
-        )
+        .find({"name": {"$regex": search, "$options": "i"}})
         .sort("created_at", pymongo.DESCENDING)
         .limit(limit)
         .skip(limit * (page - 1))
